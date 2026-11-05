@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import LoginScreen from '../features/auth/screens/LoginScreen';
 import RegisterScreen from '../features/auth/screens/RegisterScreen';
@@ -72,103 +72,102 @@ const groups = {
     },
 };
 
+const mobileMenus = {
+    user: [
+        ['userHome', 'Inicio', '⌂'],
+        ['explore', 'Explorar', '◇'],
+        ['createService', 'Crear', '+'],
+        ['favorites', 'Favoritos', '♡'],
+        ['profile', 'Perfil', '○'],
+    ],
+    admin: [
+        ['adminHome', 'Inicio', '⌂'],
+        ['reports', 'Reportes', '▥'],
+        ['dashboard', 'Dashboard', '▣'],
+        ['credits', 'Créditos', '◷'],
+        ['categories', 'Categorías', '□'],
+    ],
+};
+
 export default function Navigation() {
     const [group, setGroup] = useState('auth');
     const [screenKey, setScreenKey] = useState('login');
-    const currentGroup = groups[group];
     const activeScreen =
-        currentGroup.screens.find(([key]) => key === screenKey) ||
-        currentGroup.screens[0];
+        groups[group].screens.find(([key]) => key === screenKey) ||
+        groups[group].screens[0];
     const Screen = activeScreen[2];
 
-    const changeGroup = (nextGroup) => {
-        setGroup(nextGroup);
-        setScreenKey(groups[nextGroup].screens[0][0]);
-    };
+    const mobileMenu = mobileMenus[group];
+    const screenProps =
+        group === 'auth'
+            ? {
+                  onLogin: (role) => {
+                      setGroup(role);
+                      setScreenKey(role === 'admin' ? 'adminHome' : 'userHome');
+                  },
+              }
+            : {};
 
     return (
         <View style={styles.container}>
-            <View style={styles.header}>
-                <Text style={styles.appName}>Banco de Tiempo</Text>
-                <Text style={styles.subtitle}>{currentGroup.label}</Text>
-            </View>
-            <View style={styles.switch}>
-                {Object.entries(groups).map(([key, value]) => (
-                    <Pressable
-                        key={key}
-                        onPress={() => changeGroup(key)}
-                        style={[
-                            styles.switchButton,
-                            group === key && styles.switchButtonActive,
-                        ]}
-                    >
-                        <Text
-                            style={[
-                                styles.switchText,
-                                group === key && styles.switchTextActive,
-                            ]}
-                        >
-                            {value.label}
-                        </Text>
-                    </Pressable>
-                ))}
-            </View>
             <View style={styles.content}>
-                <Screen />
+                <Screen {...screenProps} />
             </View>
-            <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.menu}
-            >
-                {currentGroup.screens.map(([key, label]) => (
-                    <Pressable
-                        key={key}
-                        onPress={() => setScreenKey(key)}
-                        style={[
-                            styles.menuButton,
-                            screenKey === key && styles.menuButtonActive,
-                        ]}
-                    >
-                        <Text
-                            style={[
-                                styles.menuText,
-                                screenKey === key && styles.menuTextActive,
-                            ]}
+            {mobileMenu && (
+                <View style={styles.bottomBar}>
+                    {mobileMenu.map(([key, label, icon]) => (
+                        <Pressable
+                            key={key}
+                            onPress={() => setScreenKey(key)}
+                            style={styles.menuButton}
                         >
-                            {label}
-                        </Text>
-                    </Pressable>
-                ))}
-            </ScrollView>
+                            <Text
+                                style={[
+                                    styles.menuIcon,
+                                    screenKey === key && styles.menuIconActive,
+                                ]}
+                            >
+                                {icon}
+                            </Text>
+                            <Text
+                                style={[
+                                    styles.menuText,
+                                    screenKey === key && styles.menuTextActive,
+                                ]}
+                            >
+                                {label}
+                            </Text>
+                        </Pressable>
+                    ))}
+                </View>
+            )}
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    container: { backgroundColor: '#f1f5f9', flex: 1 },
-    header: {
-        backgroundColor: '#16213e',
-        paddingBottom: 16,
-        paddingHorizontal: 20,
-        paddingTop: 56,
-    },
-    appName: { color: '#fff', fontSize: 22, fontWeight: '700' },
-    subtitle: { color: '#cbd5e1', fontSize: 14, marginTop: 4 },
-    switch: { backgroundColor: '#fff', flexDirection: 'row', padding: 8 },
-    switchButton: { borderRadius: 8, flex: 1, padding: 10 },
-    switchButtonActive: { backgroundColor: '#dbeafe' },
-    switchText: { color: '#64748b', fontSize: 13, textAlign: 'center' },
-    switchTextActive: { color: '#1d4ed8', fontWeight: '700' },
+    container: { backgroundColor: '#f8fafc', flex: 1 },
     content: { flex: 1 },
-    menu: { gap: 8, padding: 12 },
-    menuButton: {
-        backgroundColor: '#fff',
-        borderRadius: 8,
-        paddingHorizontal: 12,
-        paddingVertical: 10,
+    bottomBar: {
+        alignItems: 'flex-end',
+        backgroundColor: '#ffffff',
+        borderTopColor: '#e2e8f0',
+        borderTopWidth: 1,
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        minHeight: 82,
+        paddingBottom: 10,
+        paddingTop: 8,
     },
-    menuButtonActive: { backgroundColor: '#2563eb' },
-    menuText: { color: '#334155', fontSize: 12 },
-    menuTextActive: { color: '#fff', fontWeight: '700' },
+    menuButton: {
+        alignItems: 'center',
+        flex: 1,
+        gap: 4,
+        justifyContent: 'center',
+        minHeight: 58,
+    },
+    menuIcon: { color: '#64748b', fontSize: 26, lineHeight: 28 },
+    menuIconActive: { color: '#16805f' },
+    menuText: { color: '#64748b', fontSize: 12 },
+    menuTextActive: { color: '#16805f', fontWeight: '700' },
 });
