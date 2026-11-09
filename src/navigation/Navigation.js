@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { Image, Platform, Pressable, SafeAreaView, StatusBar, StyleSheet, Text, View } from 'react-native';
+import { Image, Platform, Pressable, StatusBar, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
 
 import LoginScreen from '../features/auth/screens/LoginScreen';
 import RegisterScreen from '../features/auth/screens/RegisterScreen';
@@ -133,8 +135,7 @@ export default function Navigation() {
     const hideBar = activeKey === 'rateExchange';
 
     const mobileMenu = mobileMenus[group];
-    const Frame = isUser && Platform.OS === 'ios' ? SafeAreaView : View;
-
+    
     function openScreen(key, params = {}) {
         setScreen({ key, params });
     }
@@ -149,7 +150,7 @@ export default function Navigation() {
         : { ...screenDefaults, ...screen.params, onOpen: openScreen };
 
     return (
-        <Frame style={[styles.container, isUser && styles.userContainer]}>
+        <SafeAreaView style={[styles.container, isUser && styles.userContainer]}>
             <View style={styles.content}>
                 <Screen key={activeKey} {...screenProps} />
             </View>
@@ -181,7 +182,7 @@ export default function Navigation() {
                 </View>
             )}
             {hideBar && <View style={styles.sheetBottom} />}
-        </Frame>
+        </SafeAreaView>
     );
 }
 
