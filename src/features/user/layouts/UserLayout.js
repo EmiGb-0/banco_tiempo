@@ -1,13 +1,23 @@
-import { StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet } from 'react-native';
+import { colors } from '../styles';
 
-export default function UserLayout({ children }) {
-    return <View style={styles.container}>{children}</View>;
+export default function UserLayout({ children, contentStyle = null }) {
+    return (
+        <ScrollView style={styles.container} contentContainerStyle={[styles.content, contentStyle]}>
+            {children}
+        </ScrollView>
+    );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        backgroundColor: '#f8fafc',
-        flex: 1,
-        padding: 24,
+    container: { backgroundColor: colors.background, flex: 1 },
+    content: {
+        gap: 14,
+        paddingHorizontal: 24,
+        paddingTop: 16,
+        paddingBottom: 24,
+        alignSelf: 'center',
+        width: '100%',
+        maxWidth: 600,
     },
 });
