@@ -135,7 +135,7 @@ export default function Navigation() {
     const hideBar = activeKey === 'rateExchange';
 
     const mobileMenu = mobileMenus[group];
-    
+
     function openScreen(key, params = {}) {
         setScreen({ key, params });
     }
@@ -145,19 +145,13 @@ export default function Navigation() {
         openScreen(role === 'admin' ? 'adminHome' : 'userHome');
     }
 
-    
-    const screenProps =
-        group === 'auth'
-            ? {
-                  onLogin: (role) => {
-                      setGroup(role);
-                      setScreenKey(role === 'admin' ? 'adminHome' : 'userHome');
-                  },
-              }
-            : {
-                  navigate: (key) => setScreenKey(key),
-              };
-
+    const screenProps = group === 'auth'
+        ? {
+            onLogin: login,
+            onRegister: () => openScreen('register'),
+            onSignIn: () => openScreen('login'),
+        }
+        : { ...screenDefaults, ...screen.params, onOpen: openScreen, navigate: openScreen };
 
     return (
         <SafeAreaView style={[styles.container, isUser && styles.userContainer]}>
