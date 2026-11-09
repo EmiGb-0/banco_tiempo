@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Platform, Pressable, SafeAreaView, StatusBar, StyleSheet, Text, View } from 'react-native';
 
 import LoginScreen from '../features/auth/screens/LoginScreen';
 import RegisterScreen from '../features/auth/screens/RegisterScreen';
@@ -25,6 +25,20 @@ import ServicePublishedScreen from '../features/user/screens/ServicePublishedScr
 import PublishErrorScreen from '../features/user/screens/PublishErrorScreen';
 import TakenServicesScreen from '../features/user/screens/TakenServicesScreen';
 import OfferedServicesScreen from '../features/user/screens/OfferedServicesScreen';
+import EditProfileScreen from '../features/user/screens/EditProfileScreen';
+import ParticipantCategoriesScreen from '../features/user/screens/CategoriesScreen';
+import SkillsScreen from '../features/user/screens/SkillsScreen';
+import SkillFormScreen from '../features/user/screens/SkillFormScreen';
+import RequestsScreen from '../features/user/screens/RequestsScreen';
+import CreateRequestScreen from '../features/user/screens/CreateRequestScreen';
+import RequestDetailScreen from '../features/user/screens/RequestDetailScreen';
+import ExchangeDetailScreen from '../features/user/screens/ExchangeDetailScreen';
+import ParticipantCreditsScreen from '../features/user/screens/CreditsScreen';
+import RateExchangeScreen from '../features/user/screens/RateExchangeScreen';
+import ReviewsScreen from '../features/user/screens/ReviewsScreen';
+import ActivityScreen from '../features/user/screens/ActivityScreen';
+import { icons } from '../features/user/images';
+import { colors } from '../features/user/styles';
 
 const groups = {
     auth: {
@@ -38,24 +52,43 @@ const groups = {
         label: 'Participante',
         screens: [
             ['userHome', 'Inicio', UserHomeScreen],
-            ['viewService', 'Ver servicio', ViewServiceScreen],
+            ['viewService', 'Ver servicio', ViewServiceScreen, { tab: 'explore' }],
             ['createService', 'Crear servicio', CreateServiceScreen],
             ['favorites', 'Favoritos', FavoritesScreen],
             ['profile', 'Perfil', ProfileScreen],
             ['explore', 'Explorar', ExploreScreen],
-            ['requestSent', 'Solicitud enviada', RequestSentScreen],
-            ['myServices', 'Mis servicios', MyServicesScreen],
-            ['manageService', 'Administrar servicio', ManageServiceScreen],
+            ['requestSent', 'Solicitud enviada', RequestSentScreen, { tab: 'explore' }],
+            ['myServices', 'Mis servicios', MyServicesScreen, { tab: 'profile' }],
+            ['manageService', 'Administrar servicio', ManageServiceScreen, { tab: 'profile' }],
             [
                 'receivedRequests',
                 'Solicitudes recibidas',
                 ReceivedRequestsScreen,
+                { tab: 'profile' },
             ],
-            ['editService', 'Editar servicio', EditServiceScreen],
-            ['servicePublished', 'Servicio publicado', ServicePublishedScreen],
-            ['publishError', 'Error al publicar', PublishErrorScreen],
-            ['takenServices', 'Servicios tomados', TakenServicesScreen],
-            ['offeredServices', 'Servicios ofrecidos', OfferedServicesScreen],
+            ['editService', 'Editar servicio', EditServiceScreen, { tab: 'profile' }],
+            ['servicePublished', 'Servicio publicado', ServicePublishedScreen, { tab: 'createService' }],
+            ['publishError', 'Error al publicar', PublishErrorScreen, { tab: 'createService' }],
+            ['takenServices', 'Servicios tomados', TakenServicesScreen, { tab: 'profile' }],
+            ['offeredServices', 'Servicios ofrecidos', OfferedServicesScreen, { tab: 'profile' }],
+            ['editProfile', 'Editar perfil', EditProfileScreen, { tab: 'profile' }],
+            ['userCategories', 'Categorías', ParticipantCategoriesScreen, { tab: 'explore' }],
+            ['categoryDetail', 'Detalle de categoría', ParticipantCategoriesScreen, { tab: 'explore' }],
+            ['skills', 'Mis habilidades', SkillsScreen, { tab: 'profile' }],
+            ['addSkill', 'Registrar habilidad', SkillFormScreen, { tab: 'profile' }],
+            ['editSkill', 'Editar habilidad', SkillFormScreen, { editing: true, tab: 'profile' }],
+            ['savedService', 'Servicio guardado', ViewServiceScreen, { saved: true, tab: 'favorites' }],
+            ['requests', 'Mis solicitudes', RequestsScreen, { tab: 'profile' }],
+            ['createRequest', 'Crear solicitud', CreateRequestScreen, { tab: 'explore' }],
+            ['requestPending', 'Solicitud pendiente', RequestDetailScreen, { tab: 'profile' }],
+            ['requestAccepted', 'Solicitud aceptada', RequestDetailScreen, { example: 1, tab: 'profile' }],
+            ['requestRejected', 'Solicitud rechazada', RequestDetailScreen, { example: 2, tab: 'profile' }],
+            ['exchangeDetail', 'Detalle de intercambio', ExchangeDetailScreen, { tab: 'profile' }],
+            ['userCredits', 'Mis créditos', ParticipantCreditsScreen, { tab: 'profile' }],
+            ['rateExchange', 'Calificar intercambio', RateExchangeScreen],
+            ['reviews', 'Mis calificaciones', ReviewsScreen, { tab: 'profile' }],
+            ['userActivity', 'Mi actividad', ActivityScreen, { tab: 'profile' }],
+            ['userReport', 'Reporte personal', ActivityScreen, { report: true, tab: 'profile' }],
         ],
     },
     admin: {
@@ -74,11 +107,11 @@ const groups = {
 
 const mobileMenus = {
     user: [
-        ['userHome', 'Inicio', '⌂'],
-        ['explore', 'Explorar', '◇'],
-        ['createService', 'Crear', '+'],
-        ['favorites', 'Favoritos', '♡'],
-        ['profile', 'Perfil', '○'],
+        ['userHome', 'Inicio', 'home'],
+        ['explore', 'Explorar', 'explore'],
+        ['createService', 'Crear', 'create'],
+        ['favorites', 'Favoritos', 'favorites'],
+        ['profile', 'Perfil', 'profile'],
     ],
     admin: [
         ['adminHome', 'Inicio', '⌂'],
@@ -91,63 +124,85 @@ const mobileMenus = {
 
 export default function Navigation() {
     const [group, setGroup] = useState('auth');
-    const [screenKey, setScreenKey] = useState('login');
-    const activeScreen =
-        groups[group].screens.find(([key]) => key === screenKey) ||
-        groups[group].screens[0];
-    const Screen = activeScreen[2];
+    const [screen, setScreen] = useState({ key: 'login', params: {} });
+    const isUser = group === 'user';
+    const activeScreen = groups[group].screens.find(([key]) => key === screen.key)
+        || groups[group].screens[0];
+    const [activeKey, , Screen, screenDefaults] = activeScreen;
+    const selectedTab = screenDefaults?.tab || activeKey;
+    const hideBar = activeKey === 'rateExchange';
 
     const mobileMenu = mobileMenus[group];
-    const screenProps =
-        group === 'auth'
-            ? {
-                  onLogin: (role) => {
-                      setGroup(role);
-                      setScreenKey(role === 'admin' ? 'adminHome' : 'userHome');
-                  },
-              }
-            : {};
+    const Frame = isUser && Platform.OS === 'ios' ? SafeAreaView : View;
+
+    function openScreen(key, params = {}) {
+        setScreen({ key, params });
+    }
+
+    function login(role) {
+        setGroup(role);
+        openScreen(role === 'admin' ? 'adminHome' : 'userHome');
+    }
+
+    const screenProps = group === 'auth'
+        ? { onLogin: login }
+        : { ...screenDefaults, ...screen.params, onOpen: openScreen };
 
     return (
-        <View style={styles.container}>
+        <Frame style={[styles.container, isUser && styles.userContainer]}>
             <View style={styles.content}>
-                <Screen {...screenProps} />
+                <Screen key={activeKey} {...screenProps} />
             </View>
-            {mobileMenu && (
-                <View style={styles.bottomBar}>
-                    {mobileMenu.map(([key, label, icon]) => (
-                        <Pressable
-                            key={key}
-                            onPress={() => setScreenKey(key)}
-                            style={styles.menuButton}
-                        >
-                            <Text
-                                style={[
-                                    styles.menuIcon,
-                                    screenKey === key && styles.menuIconActive,
-                                ]}
+            {mobileMenu && !hideBar && (
+                <View style={[styles.bottomBar, isUser && styles.userBar]}>
+                    {mobileMenu.map(([key, label, icon]) => {
+                        const selected = selectedTab === key;
+                        return (
+                            <Pressable
+                                key={key}
+                                onPress={() => openScreen(key)}
+                                accessibilityRole={isUser ? 'tab' : undefined}
+                                accessibilityState={isUser ? { selected } : undefined}
+                                style={[styles.menuButton, isUser && styles.userButton]}
                             >
-                                {icon}
-                            </Text>
-                            <Text
-                                style={[
-                                    styles.menuText,
-                                    screenKey === key && styles.menuTextActive,
-                                ]}
-                            >
-                                {label}
-                            </Text>
-                        </Pressable>
-                    ))}
+                                {isUser ? (
+                                    <View collapsable={false} style={[styles.indicator, selected && styles.indicatorActive]}>
+                                        <Image source={icons[selected ? icon + 'On' : icon]} accessible={false} />
+                                    </View>
+                                ) : (
+                                    <Text style={[styles.menuIcon, selected && styles.menuIconActive]}>{icon}</Text>
+                                )}
+                                <Text style={[styles.menuText, isUser && styles.userLabel, selected && styles.menuTextActive]}>
+                                    {label}
+                                </Text>
+                            </Pressable>
+                        );
+                    })}
                 </View>
             )}
-        </View>
+            {hideBar && <View style={styles.sheetBottom} />}
+        </Frame>
     );
 }
 
 const styles = StyleSheet.create({
     container: { backgroundColor: '#f8fafc', flex: 1 },
     content: { flex: 1 },
+    userContainer: {
+        backgroundColor: colors.background,
+        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+    },
+    userBar: {
+        borderTopColor: colors.border,
+        minHeight: 62,
+        paddingHorizontal: 8,
+        paddingBottom: Platform.OS === 'android' ? 48 : 8,
+    },
+    userButton: { minHeight: 44 },
+    userLabel: { fontSize: 10, color: colors.muted, textAlign: 'center' },
+    indicator: { width: 48, height: 29, maxWidth: '100%', borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+    indicatorActive: { backgroundColor: colors.mint },
+    sheetBottom: { height: Platform.OS === 'android' ? 48 : 0, backgroundColor: colors.white },
     bottomBar: {
         alignItems: 'flex-end',
         backgroundColor: '#ffffff',
