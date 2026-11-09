@@ -135,7 +135,6 @@ export default function Navigation() {
     const hideBar = activeKey === 'rateExchange';
 
     const mobileMenu = mobileMenus[group];
-<<<<<<< HEAD
     
     function openScreen(key, params = {}) {
         setScreen({ key, params });
