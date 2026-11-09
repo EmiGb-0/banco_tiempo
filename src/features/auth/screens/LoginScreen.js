@@ -1,8 +1,11 @@
-import AuthLayout from '../layouts/AuthLayout';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Image, Pressable, Text, TextInput, View } from 'react-native';
+import AuthLayout from '../layouts/AuthLayout';
+import { colors, styles } from '../styles';
 
-export default function LoginScreen({ onLogin }) {
+const arrow = require('../../../../assets/participant/arrow.png');
+
+export default function LoginScreen({ onLogin, onRegister }) {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -25,82 +28,54 @@ export default function LoginScreen({ onLogin }) {
 
     return (
         <AuthLayout>
-            <View style={styles.card}>
-                <Text style={styles.title}>Iniciar sesión</Text>
-                <Text style={styles.description}>
-                    Accede a tu cuenta de Banco de Tiempo.
-                </Text>
-                <TextInput
-                    autoCapitalize="none"
-                    onChangeText={setUsername}
-                    placeholder="Usuario"
-                    style={styles.input}
-                    value={username}
-                />
-                <TextInput
-                    onChangeText={setPassword}
-                    placeholder="Contraseña"
-                    secureTextEntry
-                    style={styles.input}
-                    value={password}
-                />
-                {error ? <Text style={styles.error}>{error}</Text> : null}
-                <Pressable onPress={handleLogin} style={styles.button}>
-                    <Text style={styles.buttonText}>Entrar</Text>
-                </Pressable>
-                <Text style={styles.hint}>
-                    Credenciales de prueba: usuario / usuario o admin / admin
-                </Text>
+            <View style={styles.heading}>
+                <Text accessibilityRole="header" style={styles.title}>Bienvenido</Text>
+                <Text style={styles.description}>Ingresa para continuar.</Text>
             </View>
+            <View style={styles.loginForm}>
+                <View style={styles.field}>
+                    <Text style={styles.label}>Correo electrónico</Text>
+                    <TextInput
+                        accessibilityLabel="Correo electrónico"
+                        autoCapitalize="none"
+                        autoCorrect={false}
+                        keyboardType="email-address"
+                        onChangeText={setUsername}
+                        placeholder="Ingresa tu correo"
+                        placeholderTextColor={colors.muted}
+                        style={styles.input}
+                        value={username}
+                    />
+                </View>
+                <View style={styles.field}>
+                    <Text style={styles.label}>Contraseña</Text>
+                    <TextInput
+                        accessibilityLabel="Contraseña"
+                        onChangeText={setPassword}
+                        placeholder="Ingresa tu contraseña"
+                        placeholderTextColor={colors.muted}
+                        secureTextEntry
+                        style={styles.input}
+                        value={password}
+                    />
+                </View>
+                <Text style={styles.recovery}>¿Olvidaste tu contraseña?</Text>
+                {error ? (
+                    <View style={styles.field}>
+                        <Text accessibilityRole="alert" style={styles.error}>{error}</Text>
+                        <Text style={styles.hint}>Credenciales de prueba: usuario / usuario o admin / admin</Text>
+                    </View>
+                ) : null}
+                <Pressable accessibilityRole="button" onPress={handleLogin} style={styles.button}>
+                    <Image source={arrow} accessible={false} />
+                    <Text style={styles.buttonText}>Iniciar sesión</Text>
+                </Pressable>
+            </View>
+            <Pressable accessibilityRole="link" accessibilityLabel="Crear cuenta" hitSlop={12}
+                onPress={onRegister} style={styles.accountLink}>
+                <Text style={styles.footer}>¿Aún no eres parte? <Text style={styles.link}>Crear cuenta</Text></Text>
+            </Pressable>
+            <Text style={styles.credit}>1 hora = 1 crédito</Text>
         </AuthLayout>
     );
 }
-
-const styles = StyleSheet.create({
-    card: {
-        backgroundColor: '#ffffff',
-        borderRadius: 16,
-        maxWidth: 420,
-        padding: 24,
-        width: '100%',
-    },
-    title: {
-        color: '#16213e',
-        fontSize: 26,
-        fontWeight: '700',
-    },
-    description: {
-        color: '#64748b',
-        fontSize: 15,
-        marginTop: 8,
-    },
-    input: {
-        borderColor: '#cbd5e1',
-        borderRadius: 10,
-        borderWidth: 1,
-        marginTop: 16,
-        padding: 14,
-    },
-    error: {
-        color: '#dc2626',
-        fontSize: 13,
-        marginTop: 10,
-    },
-    button: {
-        alignItems: 'center',
-        backgroundColor: '#2563eb',
-        borderRadius: 10,
-        marginTop: 20,
-        padding: 14,
-    },
-    buttonText: {
-        color: '#ffffff',
-        fontWeight: '700',
-    },
-    hint: {
-        color: '#64748b',
-        fontSize: 12,
-        marginTop: 16,
-        textAlign: 'center',
-    },
-});

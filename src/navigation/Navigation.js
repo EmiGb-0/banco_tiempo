@@ -145,7 +145,7 @@ export default function Navigation() {
     }
 
     const screenProps = group === 'auth'
-        ? { onLogin: login }
+        ? { onLogin: login, onRegister: () => openScreen('register'), onSignIn: () => openScreen('login') }
         : { ...screenDefaults, ...screen.params, onOpen: openScreen };
 
     return (
